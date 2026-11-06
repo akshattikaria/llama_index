@@ -8,6 +8,7 @@ import pytest
 from llama_index.core.bridge.pydantic import BaseModel, Field
 from llama_index.core.llms import TextBlock, ImageBlock, DocumentBlock, VideoBlock
 from llama_index.core.tools.function_tool import FunctionTool
+from llama_index.core.tools.types import ToolOutput
 from llama_index.core.schema import Document, TextNode
 from llama_index.core.workflow.context import Context
 from llama_index.core.workflow import Context
@@ -212,6 +213,12 @@ def test_function_tool_partial_params_schema() -> None:
     actual_schema = tool.metadata.fn_schema.model_json_schema()
     assert actual_schema["properties"]["x"]["type"] == "integer"
     assert "y" not in actual_schema["properties"]
+
+
+def test_tool_output_without_raw_input() -> None:
+    tool_output = ToolOutput(tool_name="test")
+
+    assert tool_output.raw_input is None
 
 
 def test_function_tool_partial_params() -> None:

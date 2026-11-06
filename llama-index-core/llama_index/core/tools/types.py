@@ -108,7 +108,7 @@ class ToolOutput(BaseModel):
 
     blocks: List[ContentBlock]
     tool_name: str
-    raw_input: Dict[str, Any]
+    raw_input: Optional[Dict[str, Any]]
     raw_output: Any
     is_error: bool = False
 
