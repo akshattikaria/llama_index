@@ -67,6 +67,24 @@ def test_set_and_retrieve_messages(sqlite_chat_store: SQLiteChatStore):
     assert retrieved_messages[1].content == "Second message"
 
 
+@pytest.mark.skipif(
+    no_packages, reason="aiosqlite, sqlite3 and sqlalchemy not installed"
+)
+def test_set_messages_replaces_existing_messages(sqlite_chat_store: SQLiteChatStore):
+    key = "test_set_replaces_key"
+    sqlite_chat_store.set_messages(
+        key, [ChatMessage(content="Old message", role="user")]
+    )
+
+    sqlite_chat_store.set_messages(
+        key, [ChatMessage(content="New message", role="assistant")]
+    )
+
+    retrieved_messages = sqlite_chat_store.get_messages(key)
+    assert len(retrieved_messages) == 1
+    assert retrieved_messages[0].content == "New message"
+
+
 def test_delete_messages(sqlite_chat_store: SQLiteChatStore):
     messages = [ChatMessage(content="Message to delete", role="user")]
     key = "test_delete_key"
@@ -161,6 +179,24 @@ async def test_async_set_and_retrieve_messages(sqlite_chat_store: SQLiteChatStor
 @pytest.mark.skipif(
     no_packages, reason="aiosqlite, sqlite3 and sqlalchemy not installed"
 )
+@pytest.mark.asyncio
+async def test_async_set_messages_replaces_existing_messages(
+    sqlite_chat_store: SQLiteChatStore,
+):
+    key = "test_async_set_replaces_key"
+    await sqlite_chat_store.aset_messages(
+        key, [ChatMessage(content="Old message", role="user")]
+    )
+
+    await sqlite_chat_store.aset_messages(
+        key, [ChatMessage(content="New message", role="assistant")]
+    )
+
+    retrieved_messages = await sqlite_chat_store.aget_messages(key)
+    assert len(retrieved_messages) == 1
+    assert retrieved_messages[0].content == "New message"
+
+
 @pytest.mark.asyncio
 async def test_adelete_messages(sqlite_chat_store: SQLiteChatStore):
     messages = [ChatMessage(content="Async message to delete", role="user")]

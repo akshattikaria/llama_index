@@ -210,6 +210,9 @@ class SQLiteChatStore(BaseChatStore):
         """Set messages for a key."""
         with self._session() as session:
             session.execute(
+                delete(self._table_class).where(self._table_class.key == key)
+            )
+            session.execute(
                 insert(self._table_class),
                 [
                     {"key": key, "value": message.model_dump(mode="json")}
@@ -221,6 +224,9 @@ class SQLiteChatStore(BaseChatStore):
     async def aset_messages(self, key: str, messages: list[ChatMessage]) -> None:
         """Async version of Get messages for a key."""
         async with self._async_session() as session:
+            await session.execute(
+                delete(self._table_class).where(self._table_class.key == key)
+            )
             await session.execute(
                 insert(self._table_class),
                 [
