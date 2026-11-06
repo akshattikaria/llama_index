@@ -66,6 +66,7 @@ class TokenTextSplitter(MetadataAwareTextSplitter):
                 f"Got a larger chunk overlap ({chunk_overlap}) than chunk size "
                 f"({chunk_size}), should be smaller."
             )
+        backup_separators = backup_separators or []
         callback_manager = callback_manager or CallbackManager([])
         id_func = id_func or default_id_func
         super().__init__(
