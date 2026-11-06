@@ -141,6 +141,44 @@ def test_delete_specific_message(postgres_chat_store: PostgresChatStore):
 
 
 @pytest.mark.skipif(no_packages, reason="asyncpg, psycopg and sqlalchemy not installed")
+def test_delete_methods_respect_configured_schema(
+    postgres_container: Dict[str, Union[str, Container]],
+):
+    """Raw UPDATE statements must use the same schema as model-based queries."""
+    chat_store = PostgresChatStore.from_uri(
+        uri=postgres_container["connection_string"],
+        table_name="schema_delete_test",
+        schema_name="custom_chat_schema",
+        use_jsonb=True,
+    )
+
+    key = "schema_delete_test_key"
+    chat_store.set_messages(
+        key,
+        [
+            ChatMessage(content="keep", role="user"),
+            ChatMessage(content="delete by index", role="user"),
+            ChatMessage(content="delete last", role="user"),
+        ],
+    )
+
+    deleted_by_index = chat_store.delete_message(key, 1)
+    assert deleted_by_index is not None
+    assert deleted_by_index.content == "delete by index"
+    assert [message.content for message in chat_store.get_messages(key)] == [
+        "keep",
+        "delete last",
+    ]
+
+    deleted_last = chat_store.delete_last_message(key)
+    assert deleted_last is not None
+    assert deleted_last.content == "delete last"
+    assert [message.content for message in chat_store.get_messages(key)] == ["keep"]
+
+    chat_store.delete_messages(key)
+
+
+@pytest.mark.skipif(no_packages, reason="asyncpg, psycopg and sqlalchemy not installed")
 @pytest.mark.asyncio
 async def test_get_keys(postgres_chat_store: PostgresChatStore):
     # Add some test data
